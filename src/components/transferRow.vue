@@ -1,3 +1,6 @@
+<!--
+@description Assignment Task 4: Styling of the transferRow component
+-->
 <template>
   <div class="transfer-row">
     <h4>{{ transfer.fromSecurityHolder }}</h4>
@@ -15,9 +18,10 @@
       <span class="prop-label">Amount:</span>
       {{ transfer.amount }}
     </p>
-    <span v-if="transfer.forgottenProperty">{{
-      transfer.forgottenProperty
-    }}</span>
+    <p v-if="transfer.forgottenProperty">
+      <span class="prop-label">Important property:</span>
+      <span>{{ transfer.forgottenProperty }}</span>
+    </p>
   </div>
 </template>
 
@@ -35,6 +39,9 @@ export default class TransferRow extends Vue {
 </script>
 
 <style lang="scss">
+/**
+* @description Assignment Task 4: Styling of the transferRow component
+*/
 .transfer-row {
   margin: 1rem;
   max-width: 500px;
@@ -44,7 +51,7 @@ export default class TransferRow extends Vue {
   align-items: flex-start;
   background-color: #fff;
   border-radius: 0.75rem;
-  box-shadow: 0 0 4px 2px #ebebed;
+  box-shadow: 0 0 6px 4px #ebebeb;
   color: black;
 
   &__state {
@@ -66,7 +73,7 @@ export default class TransferRow extends Vue {
   }
 
   &__state.NEW {
-    background-color: rgba(255,131,95, 0.5);
+    background-color: rgba(255, 131, 95, 0.5);
   }
 
   &__state.MODIFIED {

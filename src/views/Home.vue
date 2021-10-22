@@ -36,14 +36,17 @@ export default class Home extends Vue {
   ];
   loading = false;
 
+  /**
+   * @description Assignment task 2: Converting Promise chain into asyn/await calls
+   */
   // mounted works fine if your ide complains about it
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   async mounted(): Promise<void> {
-    let initialData: TableData[] = await this.getDataWithTotalsRow();
+    let tableData: TableData[] = await this.getDataWithTotalsRow();
 
     this.loading = true;
 
-    let formattedData: TableData[] = await initialData.map(
+    let formattedData: TableData[] = await tableData.map(
       (dataItem: TableData) => ({
         ...dataItem,
         randomNumber: Math.random(),
@@ -61,38 +64,38 @@ export default class Home extends Vue {
   }
 
   /**
-   * @description This method does the following:
-   * - calculates and appends the 'totals' row from the table data
-   * - appends the totals row to the table data
-   * - returns the table data
+   * @description Assignment Task 1: Appending a 'totals' row to the table
+   * @summary This method does the following:
+   * -> calculates the 'totals' row
+   * -> appends the 'totals' row to the table data
+   * -> returns the table data array
    */
-  async getDataWithTotalsRow(): Promise<TableData[]> {
-    let initialData: TableData[] = await this.getData();
-    let totalsRow: TableData = {};
+  public async getDataWithTotalsRow(): Promise<TableData[]> {
+    let tableData: TableData[] = await this.getData();
+    const obj: TableData = {} as TableData;
 
-    initialData.forEach((dataRow: TableData) => {
-      Object.keys(dataRow).forEach((key) => {
-        let value: typeof key = dataRow[key];
+    // Calculating the 'totals' row
+    tableData.reduce((a: TableData, b: TableData): TableData => {
+      Object.keys(a).forEach((key) => {
+        let val_a = a[key as keyof TableData] as number;
+        let val_b = b[key as keyof TableData] as number;
 
-        if (isNaN(value)) {
-          totalsRow[key] = "";
-        } else {
-          if (totalsRow[key] != undefined) {
-            totalsRow[key] += value;
-          } else {
-            totalsRow[key] = value;
-          }
-        }
+        obj[key as keyof TableData] = (val_a + val_b) as never;
       });
+
+      //Adding a label to the row
+      obj["name"] = "Total";
+      return obj;
     });
 
-    totalsRow["name"] = "Total";
-
-    initialData.push(totalsRow);
-
-    return initialData;
+    // Appending totals row to the array of transfer objects
+    tableData.push(obj);
+    return tableData;
   }
 
+/**
+ * @description This method returns the table data
+ */
   async getData(): Promise<TableData[]> {
     return [
       {

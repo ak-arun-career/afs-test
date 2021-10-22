@@ -9,11 +9,15 @@
       <button class="edit-btn" @click="updateTransfers">
         Update transfers
       </button>
-      <transfer-row
-        :key="transfer.transactionIdentifier"
-        v-for="transfer in searchedTransfers"
-        :transfer="transfer"
-      />
+      <!-- Assignment Task 4: Styling of the transfer-rows component -->
+      <div class="transfer-rows">
+        <!-- Assignment Task 5: Fix for the update transfers button -->
+        <transfer-row
+          v-for="transfer in searchedTransfers"
+          v-bind:key="transfer.transactionIdentifier"
+          :transfer="transfer"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -30,39 +34,58 @@ import transfers from "@/assets/data";
 export default class Transfers extends Vue {
   searchTerms = "";
   transfers = transfers;
+
+  /**
+   * @description Assignment Task 3: Making the transferlist searchable by 'recordDate'
+   */
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   get searchedTransfers() {
     if (this.searchTerms) {
-      // custom search, should be improved upon
       const searchArray: Transaction[] = [];
-      this.transfers.forEach((transfer: Transaction) => {
-        let recordDate = transfer.recordDate ?? '';
-        if (recordDate.toLowerCase().includes(this.searchTerms.toLowerCase()) ) {
+
+      // Checking for record date properties matching the search term
+      this.transfers.find((transfer) => {
+        let recordDate = transfer.recordDate ?? "";
+        if (recordDate.includes(this.searchTerms.toLowerCase())) {
           searchArray.push(transfer);
         }
       });
+
       return searchArray;
     }
+
     return this.transfers;
   }
 
-  updateTransfers(): void {
+  /**
+   * @description Assignment Task 5: Fix for the update transfers button
+   * @summary The problem and solution is described in the respective code sections
+   */
+  updateTransfers(): Transaction[] {
     this.transfers.forEach((transfer: Transaction) => {
       /**
-       * PROBLEM:
-       * The property 'forgottenProperty' is undefined within each object in the 'transfers' array
-       * Therefore, it is not being initialized with the value 'Important Data...'
-       * 
-       * FIX:
-       * The code now checks if the property 'forgottenProperty' is undefined and initializes it with an empty string before assigning it with the actual value
+       * PROBLEM: The property 'forgettenProperty' is not initially available in the transfer objects within the transfer array, and is now being added as part of the 'UpdateTransfers' method call.
+       * In order to make a view reactive to property changes, Vue requires that specific property to already be present in the object during initialization.
+       *
+       * SOLUTION: Using the "Vue.$set" method to set reactive propertiesto the object
+       *
+       * REFERENCE LINK: https://vuejs.org/v2/guide/reactivity.html#For-Objects
        */
-      if (typeof(transfer.forgottenProperty) === 'undefined') {
-        transfer['forgottenProperty'] = '';
-      }
-      transfer.forgottenProperty = `Important data: ${(Math.random() * 100000000).toString().slice(1, 8)}`;
+      this.$set(
+        transfer,
+        "forgottenProperty",
+        ` ${(Math.random() * 100000000).toString().slice(1, 8)}`
+      );
     });
 
-    this.transfers[0] = {
+    /**
+     * PROBLEM: Vue doesn't detect direct value replacements in arrays, and therefore doesn't trigger a state update
+     *
+     * SOLUTION: Replacing the value by using "array.splice" ensures that the state gets updated in the Vue reactivity system
+     *
+     * REFERENCE LINK: https://vuejs.org/v2/guide/reactivity.html#For-Arrays
+     */
+    let updatedTransfer = {
       splitFactor: null,
       exDate: null,
       amount: 10000,
@@ -82,11 +105,40 @@ export default class Transfers extends Vue {
       positionWithinDay: 3,
       type: "ISSUE_STOCK",
     };
+
+    // Calculating index of array value to be replaced
+    let indexOfValueToBeReplaced = this.transfers.findIndex(
+      (transfer) =>
+        transfer.transactionIdentifier === updatedTransfer.transactionIdentifier
+    );
+    // Replacing value in array
+    this.transfers.splice(indexOfValueToBeReplaced, 1, updatedTransfer);
+
+    return this.transfers;
   }
 }
 </script>
 <style scoped lang="scss">
 .edit-btn {
   margin: 2rem;
+}
+
+/**
+* @description Assignment Task 4: Styling of the transferRow component
+*/
+.transfer-rows {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+@media screen and (max-width: 1024px) {
+  .transfer-rows {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media screen and (max-width: 768px) {
+  .transfer-rows {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
